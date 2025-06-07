@@ -7,7 +7,7 @@ import java.io.IOException;
 public class NavigationSystem {
     public static void main(String[] args) {
         MyFrame frame = new MyFrame();
-//        ResesrvationSystem frame1 = new ResesrvationSystem();
+//        ReservationSystem frame1 = new ReservationSystem();
 //        LoginSystem frame2 = new LoginSystem();
 
     }
