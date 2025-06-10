@@ -1,28 +1,29 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+import javax.imageio.ImageIO;
 
 public class Map extends JFrame {
     private Set<String> validLocations;
     private JLabel resultLabel;
-    private JLabel zoomableLabel;
-    private double scale = 1.0; // Default zoom level
-    private BufferedImage mapImage;
+    private ZoomableMapPanel mapPanel;
+    private JPanel bottomNav;
+    private JScrollPane scrollPane;
 
     public Map() {
         initializeLocations();
 
-        // Frame setup
         setTitle("Campus Map");
-        setSize(600, 750);
+        setSize(500, 750);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(true);
 
-        // Main layout
         JPanel mainPanel = new JPanel(new BorderLayout());
 
         // Navbar
@@ -38,11 +39,9 @@ public class Map extends JFrame {
         // Search Panel
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
-
         JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         JTextField searchField = new JTextField(30);
         JButton searchButton = new JButton("Search");
-
         inputPanel.add(searchField);
         inputPanel.add(searchButton);
 
@@ -54,73 +53,99 @@ public class Map extends JFrame {
         searchPanel.add(inputPanel);
         searchPanel.add(resultLabel);
 
-        searchField.addActionListener(e -> searchButton.doClick());
+        // Map Panel
+        mapPanel = new ZoomableMapPanel("floorplan/annex2/1.png");
+        scrollPane = new JScrollPane(mapPanel,
+                JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        // Load Zoomable Map
-        try {
-            mapImage = javax.imageio.ImageIO.read(getClass().getResource("floorplan/annex2/Lot-Plan-and-Floor-Plan-NU-Annex-II-2.png"));
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Could not load map image.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        zoomableLabel = new JLabel(new ImageIcon(mapImage));
-        JScrollPane scrollPane = new JScrollPane(zoomableLabel);
-        scrollPane.setPreferredSize(new Dimension(580, 600));
-        scrollPane.setBorder(null);
-
-        // Add zooming with mouse wheel
+        mapPanel.enableDragToPan(scrollPane);
         scrollPane.addMouseWheelListener(e -> {
             if (e.isControlDown()) {
-                int rotation = e.getWheelRotation();
-                if (rotation < 0) {
-                    scale *= 1.1;
-                } else {
-                    scale /= 1.1;
-                }
-                updateZoom();
+                mapPanel.zoom(e.getWheelRotation() < 0 ? 1.1 : 0.9);
             }
         });
 
         // Search logic
-        searchButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String input = searchField.getText().trim().toLowerCase();
-                if (input.isEmpty()) {
-                    resultLabel.setText("Please enter a location.");
-                } else if (validLocations.contains(input)) {
-                    resultLabel.setText("Location found: " + capitalizeWords(input));
-                } else {
-                    resultLabel.setText("Location not found: " + capitalizeWords(input));
-                }
+        searchButton.addActionListener(e -> {
+            String input = searchField.getText().trim().toLowerCase();
+            if (input.isEmpty()) {
+                resultLabel.setText("Please enter a location.");
+            } else if (validLocations.contains(input)) {
+                resultLabel.setText("Location found: " + capitalizeWords(input));
+            } else {
+                resultLabel.setText("Location not found: " + capitalizeWords(input));
             }
         });
 
-        // Assemble layout
+        // Rotate controls
+        JPanel controls = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton rotateLeft = new JButton("⟲ Rotate Left");
+        JButton rotateRight = new JButton("⟳ Rotate Right");
+        controls.add(rotateLeft);
+        controls.add(rotateRight);
+
+        rotateLeft.addActionListener(e -> mapPanel.rotate(-Math.PI / 12));
+        rotateRight.addActionListener(e -> mapPanel.rotate(Math.PI / 12));
+
+        // Bottom Navigation Bar (buildings)
+        bottomNav = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        String[] buildings = {"annex2", "main", "annex1", "jmb"};
+        for (String bld : buildings) {
+            JButton btn = new JButton("Building " + bld);
+            btn.addActionListener(e -> showFloorsForBuilding(bld));
+            bottomNav.add(btn);
+        }
+
+        // Assemble UI
         mainPanel.add(navbar, BorderLayout.NORTH);
         mainPanel.add(searchPanel, BorderLayout.BEFORE_FIRST_LINE);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(controls, BorderLayout.SOUTH);
+        mainPanel.add(bottomNav, BorderLayout.PAGE_END);
 
         this.add(mainPanel);
         this.setVisible(true);
     }
 
-    private void updateZoom() {
-        int newW = (int) (mapImage.getWidth() * scale);
-        int newH = (int) (mapImage.getHeight() * scale);
-        Image scaledImage = mapImage.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
-        zoomableLabel.setIcon(new ImageIcon(scaledImage));
-        zoomableLabel.revalidate();
+    private void showFloorsForBuilding(String building) {
+        bottomNav.removeAll();
+
+        for (int i = 1; i <= 3; i++) {
+            String label = "Floor " + i;
+            int floorNum = i;
+            JButton floorBtn = new JButton(label);
+            floorBtn.addActionListener(e -> {
+                String path = "floorplan/" + building + "/" + floorNum + ".png";
+                mapPanel.loadNewImage(path);
+            });
+            bottomNav.add(floorBtn);
+        }
+
+        JButton backBtn = new JButton("Back to Buildings");
+        backBtn.addActionListener(e -> resetBuildingNav());
+        bottomNav.add(backBtn);
+
+        bottomNav.revalidate();
+        bottomNav.repaint();
+    }
+
+    private void resetBuildingNav() {
+        bottomNav.removeAll();
+        String[] buildings = {"annex2", "main", "annex1", "jmb"};
+        for (String bld : buildings) {
+            JButton btn = new JButton("Building " + bld);
+            btn.addActionListener(e -> showFloorsForBuilding(bld));
+            bottomNav.add(btn);
+        }
+        bottomNav.revalidate();
+        bottomNav.repaint();
     }
 
     private void initializeLocations() {
         validLocations = new HashSet<>();
-        for (int i = 1; i <= 4; i++) {
-            validLocations.add(("building " + i).toLowerCase());
-        }
-        for (int i = 1; i <= 500; i++) {
-            validLocations.add(("room " + i).toLowerCase());
-        }
+        for (int i = 1; i <= 4; i++) validLocations.add(("building " + i).toLowerCase());
+        for (int i = 1; i <= 500; i++) validLocations.add(("room " + i).toLowerCase());
     }
 
     private String capitalizeWords(String text) {
@@ -137,5 +162,83 @@ public class Map extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(Map::new);
+    }
+}
+
+class ZoomableMapPanel extends JPanel {
+    private BufferedImage image;
+    private double scale = 1.0;
+    private double rotation = 0;
+
+    public ZoomableMapPanel(String imagePath) {
+        loadNewImage(imagePath);
+    }
+
+    public void loadNewImage(String imagePath) {
+        try {
+            image = ImageIO.read(new File(imagePath));
+            scale = 1.0;
+            rotation = 0;
+            setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
+            revalidate();
+            repaint();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Image not found: " + imagePath, "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void zoom(double factor) {
+        scale *= factor;
+        revalidate();
+        repaint();
+    }
+
+    public void rotate(double angle) {
+        rotation += angle;
+        repaint();
+    }
+
+    public void enableDragToPan(JScrollPane scrollPane) {
+        final Point[] start = {null};
+
+        this.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                start[0] = e.getPoint();
+            }
+        });
+
+        this.addMouseMotionListener(new MouseMotionAdapter() {
+            public void mouseDragged(MouseEvent e) {
+                if (start[0] != null) {
+                    JViewport viewPort = scrollPane.getViewport();
+                    Point vp = viewPort.getViewPosition();
+                    int dx = start[0].x - e.getX();
+                    int dy = start[0].y - e.getY();
+                    vp.translate(dx, dy);
+                    scrollRectToVisible(new Rectangle(vp, viewPort.getSize()));
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (image == null) return;
+
+        Graphics2D g2 = (Graphics2D) g.create();
+        int iw = (int) (image.getWidth() * scale);
+        int ih = (int) (image.getHeight() * scale);
+
+        setPreferredSize(new Dimension(iw, ih));
+        revalidate();
+
+        AffineTransform at = new AffineTransform();
+        at.translate(getWidth() / 2.0, getHeight() / 2.0);
+        at.rotate(rotation);
+        at.scale(scale, scale);
+        at.translate(-image.getWidth() / 2.0, -image.getHeight() / 2.0);
+        g2.drawImage(image, at, this);
+        g2.dispose();
     }
 }
