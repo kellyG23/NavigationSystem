@@ -1,7 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
 
-public class LoginSystem extends NavigationSystem {
+public class LoginSystem extends JFrame {
     LoginSystem() {
+
     }
 }

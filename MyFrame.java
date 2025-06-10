@@ -5,9 +5,9 @@ public class MyFrame extends JFrame {
     MyFrame() {
         // Frame settings
         this.setTitle("National University Navigation System");
-        this.setSize(600, 750);
+        this.setSize(500, 750);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        this.setResizable(true);
+        this.setResizable(false);
         this.setLocationRelativeTo(null);
         ImageIcon icon = new ImageIcon("elements/Logo.png");
         this.setIconImage(icon.getImage());
@@ -37,16 +37,38 @@ public class MyFrame extends JFrame {
         pathLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Start button
-        JButton startButton = new JButton("Start");
-        startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        startButton.setPreferredSize(new Dimension(100, 40));
-        startButton.setMaximumSize(new Dimension(120, 40));
+        JButton startButton = new JButton("Start") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Optional: Customize button appearance
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30); // Rounded corners
+
+                super.paintComponent(g);
+                g2.dispose();
+            }
+
+            @Override
+            protected void paintBorder(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getForeground());
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 30, 30); // Border radius
+                g2.dispose();
+            }
+        };
+
+        startButton.setContentAreaFilled(false);
         startButton.setFocusPainted(false);
-        startButton.setBackground(new Color(70, 130, 180));
+        startButton.setOpaque(false);
+        startButton.setBackground(new Color(67, 63, 63));
         startButton.setForeground(Color.WHITE);
-        startButton.setFont(new Font("Arial", Font.BOLD, 16));
+        startButton.setFont(new Font("Arial", Font.BOLD, 24));
+        startButton.setPreferredSize(new Dimension(250, 40)); // Increased size
+        startButton.setMaximumSize(new Dimension(250, 40));
+        startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         startButton.addActionListener(e -> {
             this.dispose(); // Close current window
             new Map(); // Open Map window
@@ -60,7 +82,7 @@ public class MyFrame extends JFrame {
         panel.add(textLabel);
         panel.add(Box.createRigidArea(new Dimension(0, 20)));
         panel.add(pathLabel);
-        panel.add(Box.createRigidArea(new Dimension(0, 30))); // spacing before button
+        panel.add(Box.createRigidArea(new Dimension(0, -20))); // spacing before button
         panel.add(startButton);
         panel.add(Box.createVerticalGlue());
 

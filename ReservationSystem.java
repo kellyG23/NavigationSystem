@@ -1,4 +1,4 @@
-public class ReservationSystem extends LoginSystem {
-    ReservationSystem() {
-    }
-}
+//public class ReservationSystem extends JFrame {
+//    ReservationSystem() {
+//    }
+//}
