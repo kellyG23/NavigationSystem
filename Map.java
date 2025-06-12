@@ -136,7 +136,9 @@ public class Map extends JFrame {
         JButton Res = new JButton("Reserve a Room");
         Res.addActionListener(e -> {
             this.dispose(); // Close current window
-            new LoginSystem(); // Open Map window
+            UserAccount userAccount = new UserAccount();
+
+            LoginSystem loginPage = new LoginSystem(userAccount.getLoginInfo());
         });
 
         bottomNav.add(backBtn);

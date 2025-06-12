@@ -16,8 +16,7 @@ public class LoginSystem implements ActionListener {
 
     HashMap<String, String> loginfo = new HashMap<String, String>();
 
-    LoginSystem() {
-        HashMap<String, String> loginforOriginal = null;
+    LoginSystem(HashMap<String, String> loginforOriginal) {
         loginfo = loginforOriginal; // Assign the provided login information
 
         userIDLabel.setBounds(50, 100, 75, 25);
@@ -66,7 +65,7 @@ public class LoginSystem implements ActionListener {
                 if (loginfo.get(userID).equals(password)) {
                     messageLabel.setForeground(Color.GREEN);
                     messageLabel.setText("You are successfully logged in!");
-                    WelcomePage welcomePage = new WelcomePage();
+                    ReservationSystem rs = new ReservationSystem();
                 }
                 else {
                     messageLabel.setForeground(Color.RED);
@@ -78,13 +77,5 @@ public class LoginSystem implements ActionListener {
                 messageLabel.setText("Your user id is incorrect!");
             }
         }
-    }
-    public static void main(String[] args) {
-        // Sample users
-        HashMap<String, String> loginInfo = new HashMap<>();
-        loginInfo.put("admin", "1234");
-        loginInfo.put("user", "pass");
-
-        new LoginSystem();
     }
 }

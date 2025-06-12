@@ -1,5 +1,6 @@
 import java.util.HashMap;
 
+
 public class UserAccount {
 
     HashMap<String,String> loginfo = new HashMap<String,String>();
