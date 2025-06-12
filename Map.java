@@ -4,6 +4,7 @@ import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.HashMap;
 import java.util.Objects;
 import javax.imageio.ImageIO;
 import javax.swing.border.EmptyBorder;
@@ -13,6 +14,10 @@ public class Map extends JFrame {
     private final JPanel bottomNav;
     private final JToggleButton appearButton;
     private final JLabel titleLabel;
+    private final JTextField searchField;
+
+    // Room Directory
+    private final java.util.Map<String, String> roomDirectory = new HashMap<>();
 
     public Map() {
         setTitle("Campus Map");
@@ -20,6 +25,9 @@ public class Map extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
+
+        // Initialize room directory
+        populateRoomDirectory();
 
         // Main content panel
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -50,7 +58,7 @@ public class Map extends JFrame {
 
         // Appear Toggle Button
         appearButton = new JToggleButton("☰");
-        appearButton.setBackground(new Color(255, 255, 255));
+        appearButton.setBackground(Color.WHITE);
         appearButton.setFocusable(false);
         appearButton.setBounds(230, 701, 40, 10);
 
@@ -61,11 +69,36 @@ public class Map extends JFrame {
         });
 
         // Label for building and floor
-        titleLabel = new JLabel("Annex2 - Floor 1", SwingConstants.CENTER);
+        titleLabel = new JLabel("Annex_2 - Floor 1", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         titleLabel.setOpaque(true);
         titleLabel.setBackground(Color.WHITE);
         titleLabel.setBounds(0, 0, 500, 30);
+
+        // Search Field
+        searchField = new JTextField();
+        searchField.setBounds(10, 35, 350, 25);
+
+        // Search Button
+        JButton searchButton = new JButton("Search Room");
+        searchButton.setBounds(370, 35, 120, 25);
+        searchButton.addActionListener(e -> {
+            String query = searchField.getText().trim().toLowerCase();
+            if (roomDirectory.containsKey(query)) {
+                String location = roomDirectory.get(query);
+                String[] parts = location.split(" - ");
+                String building = parts[0];
+                String floor = parts[1].replace("Floor ", "");
+                String path = "floorplan/" + building + "/" + floor + ".png";
+                mapPanel.loadNewImage(path);
+                titleLabel.setText(location);
+                appearButton.setSelected(false);
+                bottomNav.setVisible(false);
+                appearButton.setBounds(230, 701, 40, 10);
+            } else {
+                JOptionPane.showMessageDialog(this, "Room not found!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         // LayeredPane to overlap button + label on scrollPane
         JLayeredPane layeredPane = new JLayeredPane();
@@ -76,12 +109,46 @@ public class Map extends JFrame {
         layeredPane.add(scrollPane, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(appearButton, JLayeredPane.DRAG_LAYER);
         layeredPane.add(titleLabel, JLayeredPane.DRAG_LAYER);
+        layeredPane.add(searchField, JLayeredPane.DRAG_LAYER);
+        layeredPane.add(searchButton, JLayeredPane.DRAG_LAYER);
 
         mainPanel.add(layeredPane, BorderLayout.CENTER);
         mainPanel.add(bottomNav, BorderLayout.PAGE_END);
 
         this.add(mainPanel);
         this.setVisible(true);
+    }
+
+    private void populateRoomDirectory() {
+        // Annex_2 - 1st Floor
+        String b = "Annex_2";
+        roomDirectory.put("meeting room", b + " - Floor 1");
+        roomDirectory.put("clinic", b + " - Floor 1");
+        roomDirectory.put("faculty room", b + " - Floor 1");
+        roomDirectory.put("student services", b + " - Floor 1");
+        roomDirectory.put("canteen", b + " - Floor 1");
+        for (int i = 101; i <= 107; i++) {
+            roomDirectory.put("room " + i, b + " - Floor 1");
+        }
+
+        // 2nd Floor
+        roomDirectory.put("lrc", b + " - Floor 2");
+        roomDirectory.put("computer lab 1", b + " - Floor 2");
+        roomDirectory.put("computer lab 2", b + " - Floor 2");
+        roomDirectory.put("consultation room", b + " - Floor 2");
+        for (int i = 201; i <= 208; i++) {
+            roomDirectory.put("room " + i, b + " - Floor 2");
+        }
+
+        // 3rd Floor
+        for (int i = 301; i <= 311; i++) {
+            roomDirectory.put("room " + i, b + " - Floor 3");
+        }
+
+        // 4th Floor
+        for (int i = 401; i <= 411; i++) {
+            roomDirectory.put("room " + i, b + " - Floor 4");
+        }
     }
 
     private void addBuildingButtons() {
@@ -103,19 +170,12 @@ public class Map extends JFrame {
     private void showFloorsForBuilding(String building) {
         bottomNav.removeAll();
         bottomNav.setLayout(new GridLayout(0, 4, 10, 10));
-        int floors = 0;
-        if (Objects.equals(building, "Main")) {
-            floors = 8;
-        }
-        else if (Objects.equals(building, "Annex_1")) {
-            floors = 12;
-        }
-        if (Objects.equals(building, "Annex_2")) {
-            floors = 4;
-        }
-        if (Objects.equals(building, "JMB")) {
-            floors = 8;
-        }
+        int floors = switch (building) {
+            case "Main", "JMB" -> 8;
+            case "Annex_1" -> 12;
+            case "Annex_2" -> 4;
+            default -> 0;
+        };
         for (int i = 1; i <= floors; i++) {
             int floorNum = i;
             JButton floorBtn = new JButton("Floor " + floorNum);
@@ -133,16 +193,16 @@ public class Map extends JFrame {
             bottomNav.setLayout(new GridLayout(0, 2, 10, 10));
             titleLabel.setText("Select a Building");
         });
-        JButton Res = new JButton("Reserve a Room");
-        Res.addActionListener(e -> {
+
+        JButton resBtn = new JButton("Reserve a Room");
+        resBtn.addActionListener(e -> {
             this.dispose(); // Close current window
             UserAccount userAccount = new UserAccount();
-
             LoginSystem loginPage = new LoginSystem(userAccount.getLoginInfo());
         });
 
         bottomNav.add(backBtn);
-        bottomNav.add(Res);
+        bottomNav.add(resBtn);
         bottomNav.revalidate();
         bottomNav.repaint();
     }
@@ -151,6 +211,7 @@ public class Map extends JFrame {
         SwingUtilities.invokeLater(Map::new);
     }
 }
+
 
 class ZoomableMapPanel extends JPanel {
     private BufferedImage image;
