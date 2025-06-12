@@ -5,7 +5,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.HashMap;
-import java.util.Objects;
 import javax.imageio.ImageIO;
 import javax.swing.border.EmptyBorder;
 
@@ -62,7 +61,7 @@ public class Map extends JFrame {
         appearButton.setFocusable(false);
         appearButton.setBounds(230, 701, 40, 10);
 
-        appearButton.addActionListener(e -> {
+        appearButton.addActionListener(_ -> {
             boolean selected = appearButton.isSelected();
             bottomNav.setVisible(selected);
             appearButton.setBounds(230, selected ? 605 : 701, 40, 10);
@@ -80,25 +79,7 @@ public class Map extends JFrame {
         searchField.setBounds(10, 35, 350, 25);
 
         // Search Button
-        JButton searchButton = new JButton("Search Room");
-        searchButton.setBounds(370, 35, 120, 25);
-        searchButton.addActionListener(e -> {
-            String query = searchField.getText().trim().toLowerCase();
-            if (roomDirectory.containsKey(query)) {
-                String location = roomDirectory.get(query);
-                String[] parts = location.split(" - ");
-                String building = parts[0];
-                String floor = parts[1].replace("Floor ", "");
-                String path = "floorplan/" + building + "/" + floor + ".png";
-                mapPanel.loadNewImage(path);
-                titleLabel.setText(location);
-                appearButton.setSelected(false);
-                bottomNav.setVisible(false);
-                appearButton.setBounds(230, 701, 40, 10);
-            } else {
-                JOptionPane.showMessageDialog(this, "Room not found!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
+        JButton searchButton = getJButton();
 
         // LayeredPane to overlap button + label on scrollPane
         JLayeredPane layeredPane = new JLayeredPane();
@@ -117,6 +98,29 @@ public class Map extends JFrame {
 
         this.add(mainPanel);
         this.setVisible(true);
+    }
+
+    private JButton getJButton() {
+        JButton searchButton = new JButton("Search Room");
+        searchButton.setBounds(370, 35, 120, 25);
+        searchButton.addActionListener(_ -> {
+            String query = searchField.getText().trim().toLowerCase();
+            if (roomDirectory.containsKey(query)) {
+                String location = roomDirectory.get(query);
+                String[] parts = location.split(" - ");
+                String building = parts[0];
+                String floor = parts[1].replace("Floor ", "");
+                String path = "floorplan/" + building + "/" + floor + ".png";
+                mapPanel.loadNewImage(path);
+                titleLabel.setText(location);
+                appearButton.setSelected(false);
+                bottomNav.setVisible(false);
+                appearButton.setBounds(230, 701, 40, 10);
+            } else {
+                JOptionPane.showMessageDialog(this, "Room not found!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        return searchButton;
     }
 
     private void populateRoomDirectory() {
@@ -156,7 +160,7 @@ public class Map extends JFrame {
         String[] buildings = {"Main", "Annex_1", "Annex_2", "JMB"};
         for (String bld : buildings) {
             JButton btn = new JButton(bld);
-            btn.addActionListener(e -> showFloorsForBuilding(bld));
+            btn.addActionListener(_ -> showFloorsForBuilding(bld));
             bottomNav.add(btn);
             btn.setForeground(Color.WHITE);
             btn.setBackground(new Color(26, 26, 26));
@@ -179,7 +183,7 @@ public class Map extends JFrame {
         for (int i = 1; i <= floors; i++) {
             int floorNum = i;
             JButton floorBtn = new JButton("Floor " + floorNum);
-            floorBtn.addActionListener(e -> {
+            floorBtn.addActionListener(_ -> {
                 String path = "floorplan/" + building + "/" + floorNum + ".png";
                 mapPanel.loadNewImage(path);
                 titleLabel.setText(building + " - Floor " + floorNum);
@@ -188,17 +192,17 @@ public class Map extends JFrame {
         }
 
         JButton backBtn = new JButton("Back to Buildings");
-        backBtn.addActionListener(e -> {
+        backBtn.addActionListener(_ -> {
             addBuildingButtons();
             bottomNav.setLayout(new GridLayout(0, 2, 10, 10));
             titleLabel.setText("Select a Building");
         });
 
         JButton resBtn = new JButton("Reserve a Room");
-        resBtn.addActionListener(e -> {
-            this.dispose(); // Close current window
+        resBtn.addActionListener(_ -> {
+            this.dispose(); // Close the current window
             UserAccount userAccount = new UserAccount();
-            LoginSystem loginPage = new LoginSystem(userAccount.getLoginInfo());
+            new LoginSystem(userAccount.getLoginInfo());
         });
 
         bottomNav.add(backBtn);
