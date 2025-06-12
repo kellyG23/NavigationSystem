@@ -178,7 +178,7 @@ public class ReservationSystem extends JFrame {
     private void saveRoomReservation(String date, String timeOut, String timeIn,
                                      String building, String roomNumber, String purpose) {
         String dataLine = String.join("||", date, timeOut, timeIn, building, roomNumber, purpose);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("room_reservations.txt", true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("res/room_reservations.txt", true))) {
             writer.write(dataLine);
             writer.newLine();
             JOptionPane.showMessageDialog(this, "Reservation submitted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);

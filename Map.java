@@ -4,61 +4,33 @@ import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Objects;
 import javax.imageio.ImageIO;
+import javax.swing.border.EmptyBorder;
 
 public class Map extends JFrame {
-    private Set<String> validLocations;
-    private JLabel resultLabel;
-    private ZoomableMapPanel mapPanel;
-    private JPanel bottomNav;
-    private JScrollPane scrollPane;
+    private final ZoomableMapPanel mapPanel;
+    private final JPanel bottomNav;
+    private final JToggleButton appearButton;
+    private final JLabel titleLabel;
 
     public Map() {
-        initializeLocations();
-
         setTitle("Campus Map");
         setSize(500, 750);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(true);
+        setResizable(false);
 
+        // Main content panel
         JPanel mainPanel = new JPanel(new BorderLayout());
 
-        // Navbar
-        JPanel navbar = new JPanel();
-        navbar.setBackground(new Color(30, 144, 255));
-        navbar.setPreferredSize(new Dimension(getWidth(), 50));
-        navbar.setLayout(new FlowLayout(FlowLayout.LEFT));
-        JLabel navTitle = new JLabel("National University Navigation");
-        navTitle.setForeground(Color.WHITE);
-        navTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
-        navbar.add(navTitle);
-
-        // Search Panel
-        JPanel searchPanel = new JPanel();
-        searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
-        JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        JTextField searchField = new JTextField(30);
-        JButton searchButton = new JButton("Search");
-        inputPanel.add(searchField);
-        inputPanel.add(searchButton);
-
-        resultLabel = new JLabel(" ");
-        resultLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        resultLabel.setForeground(Color.DARK_GRAY);
-        resultLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        searchPanel.add(inputPanel);
-        searchPanel.add(resultLabel);
-
-        // Map Panel
-        mapPanel = new ZoomableMapPanel("floorplan/annex2/1.png");
-        scrollPane = new JScrollPane(mapPanel,
+        // Map Panel inside scroll pane
+        mapPanel = new ZoomableMapPanel("floorplan/Annex_2/1.png");
+        JScrollPane scrollPane = new JScrollPane(
+                mapPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_NEVER,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
         mapPanel.enableDragToPan(scrollPane);
         scrollPane.addMouseWheelListener(e -> {
             if (e.isControlDown()) {
@@ -66,98 +38,111 @@ public class Map extends JFrame {
             }
         });
 
-        // Search logic
-        searchButton.addActionListener(e -> {
-            String input = searchField.getText().trim().toLowerCase();
-            if (input.isEmpty()) {
-                resultLabel.setText("Please enter a location.");
-            } else if (validLocations.contains(input)) {
-                resultLabel.setText("Location found: " + capitalizeWords(input));
-            } else {
-                resultLabel.setText("Location not found: " + capitalizeWords(input));
-            }
-        });
-
-        // Rotate controls
-        JPanel controls = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton rotateLeft = new JButton("⟲ Rotate Left");
-        JButton rotateRight = new JButton("⟳ Rotate Right");
-        controls.add(rotateLeft);
-        controls.add(rotateRight);
-
-        rotateLeft.addActionListener(e -> mapPanel.rotate(-Math.PI / 12));
-        rotateRight.addActionListener(e -> mapPanel.rotate(Math.PI / 12));
-
         // Bottom Navigation Bar (buildings)
         bottomNav = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        String[] buildings = {"annex2", "main", "annex1", "jmb"};
-        for (String bld : buildings) {
-            JButton btn = new JButton("Building " + bld);
-            btn.addActionListener(e -> showFloorsForBuilding(bld));
-            bottomNav.add(btn);
-        }
+        addBuildingButtons();
 
-        // Assemble UI
-        mainPanel.add(navbar, BorderLayout.NORTH);
-        mainPanel.add(searchPanel, BorderLayout.BEFORE_FIRST_LINE);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
-        mainPanel.add(controls, BorderLayout.SOUTH);
+        bottomNav.setVisible(false);
+        bottomNav.setPreferredSize(new Dimension(500, 100));
+        bottomNav.setBackground(new Color(217, 217, 217));
+        bottomNav.setLayout(new GridLayout(0, 2, 10, 10));
+        bottomNav.setBorder(new EmptyBorder(10, 20, 10, 20));
+
+        // Appear Toggle Button
+        appearButton = new JToggleButton("☰");
+        appearButton.setBackground(new Color(255, 255, 255));
+        appearButton.setFocusable(false);
+        appearButton.setBounds(230, 701, 40, 10);
+
+        appearButton.addActionListener(e -> {
+            boolean selected = appearButton.isSelected();
+            bottomNav.setVisible(selected);
+            appearButton.setBounds(230, selected ? 605 : 701, 40, 10);
+        });
+
+        // Label for building and floor
+        titleLabel = new JLabel("Annex2 - Floor 1", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        titleLabel.setOpaque(true);
+        titleLabel.setBackground(Color.WHITE);
+        titleLabel.setBounds(0, 0, 500, 30);
+
+        // LayeredPane to overlap button + label on scrollPane
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(new Dimension(500, 700));
+        scrollPane.setBounds(0, 0, 500, 700);
+
+        layeredPane.setLayout(null);
+        layeredPane.add(scrollPane, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(appearButton, JLayeredPane.DRAG_LAYER);
+        layeredPane.add(titleLabel, JLayeredPane.DRAG_LAYER);
+
+        mainPanel.add(layeredPane, BorderLayout.CENTER);
         mainPanel.add(bottomNav, BorderLayout.PAGE_END);
 
         this.add(mainPanel);
         this.setVisible(true);
     }
 
+    private void addBuildingButtons() {
+        bottomNav.removeAll();
+        String[] buildings = {"Main", "Annex_1", "Annex_2", "JMB"};
+        for (String bld : buildings) {
+            JButton btn = new JButton(bld);
+            btn.addActionListener(e -> showFloorsForBuilding(bld));
+            bottomNav.add(btn);
+            btn.setForeground(Color.WHITE);
+            btn.setBackground(new Color(26, 26, 26));
+            btn.setFocusPainted(false);
+            btn.setBorderPainted(false);
+        }
+        bottomNav.revalidate();
+        bottomNav.repaint();
+    }
+
     private void showFloorsForBuilding(String building) {
         bottomNav.removeAll();
-
-        for (int i = 1; i <= 3; i++) {
-            String label = "Floor " + i;
+        bottomNav.setLayout(new GridLayout(0, 4, 10, 10));
+        int floors = 0;
+        if (Objects.equals(building, "Main")) {
+            floors = 8;
+        }
+        else if (Objects.equals(building, "Annex_1")) {
+            floors = 12;
+        }
+        if (Objects.equals(building, "Annex_2")) {
+            floors = 4;
+        }
+        if (Objects.equals(building, "JMB")) {
+            floors = 8;
+        }
+        for (int i = 1; i <= floors; i++) {
             int floorNum = i;
-            JButton floorBtn = new JButton(label);
+            JButton floorBtn = new JButton("Floor " + floorNum);
             floorBtn.addActionListener(e -> {
                 String path = "floorplan/" + building + "/" + floorNum + ".png";
                 mapPanel.loadNewImage(path);
+                titleLabel.setText(building + " - Floor " + floorNum);
             });
             bottomNav.add(floorBtn);
         }
 
         JButton backBtn = new JButton("Back to Buildings");
-        backBtn.addActionListener(e -> resetBuildingNav());
+        backBtn.addActionListener(e -> {
+            addBuildingButtons();
+            bottomNav.setLayout(new GridLayout(0, 2, 10, 10));
+            titleLabel.setText("Select a Building");
+        });
+        JButton Res = new JButton("Reserve a Room");
+        Res.addActionListener(e -> {
+            this.dispose(); // Close current window
+            new LoginSystem(); // Open Map window
+        });
+
         bottomNav.add(backBtn);
-
+        bottomNav.add(Res);
         bottomNav.revalidate();
         bottomNav.repaint();
-    }
-
-    private void resetBuildingNav() {
-        bottomNav.removeAll();
-        String[] buildings = {"annex2", "main", "annex1", "jmb"};
-        for (String bld : buildings) {
-            JButton btn = new JButton("Building " + bld);
-            btn.addActionListener(e -> showFloorsForBuilding(bld));
-            bottomNav.add(btn);
-        }
-        bottomNav.revalidate();
-        bottomNav.repaint();
-    }
-
-    private void initializeLocations() {
-        validLocations = new HashSet<>();
-        for (int i = 1; i <= 4; i++) validLocations.add(("building " + i).toLowerCase());
-        for (int i = 1; i <= 500; i++) validLocations.add(("room " + i).toLowerCase());
-    }
-
-    private String capitalizeWords(String text) {
-        String[] words = text.split(" ");
-        StringBuilder result = new StringBuilder();
-        for (String word : words) {
-            if (word.length() == 0) continue;
-            result.append(Character.toUpperCase(word.charAt(0)))
-                    .append(word.substring(1))
-                    .append(" ");
-        }
-        return result.toString().trim();
     }
 
     public static void main(String[] args) {
@@ -168,7 +153,6 @@ public class Map extends JFrame {
 class ZoomableMapPanel extends JPanel {
     private BufferedImage image;
     private double scale = 1.0;
-    private double rotation = 0;
 
     public ZoomableMapPanel(String imagePath) {
         loadNewImage(imagePath);
@@ -178,7 +162,6 @@ class ZoomableMapPanel extends JPanel {
         try {
             image = ImageIO.read(new File(imagePath));
             scale = 1.0;
-            rotation = 0;
             setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
             revalidate();
             repaint();
@@ -190,11 +173,6 @@ class ZoomableMapPanel extends JPanel {
     public void zoom(double factor) {
         scale *= factor;
         revalidate();
-        repaint();
-    }
-
-    public void rotate(double angle) {
-        rotation += angle;
         repaint();
     }
 
@@ -235,9 +213,9 @@ class ZoomableMapPanel extends JPanel {
 
         AffineTransform at = new AffineTransform();
         at.translate(getWidth() / 2.0, getHeight() / 2.0);
-        at.rotate(rotation);
         at.scale(scale, scale);
         at.translate(-image.getWidth() / 2.0, -image.getHeight() / 2.0);
+
         g2.drawImage(image, at, this);
         g2.dispose();
     }

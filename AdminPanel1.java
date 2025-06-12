@@ -47,7 +47,7 @@ public class AdminPanel1 extends JFrame {
 
     private void loadRoomReservationsIntoTable() {
         roomReservationTableModel.setRowCount(0);
-        try (BufferedReader reader = new BufferedReader(new FileReader("room_reservations.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("res/room_reservations.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\|\\|");
