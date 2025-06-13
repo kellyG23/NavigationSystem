@@ -191,14 +191,14 @@ public class Map extends JFrame {
             bottomNav.add(floorBtn);
         }
 
-        JButton backBtn = new JButton("Back to Buildings");
+        JButton backBtn = new JButton("Buildings");
         backBtn.addActionListener(_ -> {
             addBuildingButtons();
             bottomNav.setLayout(new GridLayout(0, 2, 10, 10));
             titleLabel.setText("Select a Building");
         });
 
-        JButton resBtn = new JButton("Reserve a Room");
+        JButton resBtn = new JButton("Reserve");
         resBtn.addActionListener(_ -> {
             this.dispose(); // Close the current window
             UserAccount userAccount = new UserAccount();
