@@ -14,24 +14,26 @@ public class Map extends JFrame {
     private final JToggleButton appearButton;
     private final JLabel titleLabel;
     private final JTextField searchField;
-
-    // Room Directory
     private final java.util.Map<String, String> roomDirectory = new HashMap<>();
+
+    private JList<String> roomList;
+    private DefaultListModel<String> roomListModel;
+    private JScrollPane roomScrollPane;
+
+    private String currentBuilding = "Annex_2";
+    private int currentFloor = 1;
 
     public Map() {
         setTitle("Campus Map");
-        setSize(500, 750);
+        setSize(640, 750);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // Initialize room directory
         populateRoomDirectory();
 
-        // Main content panel
         JPanel mainPanel = new JPanel(new BorderLayout());
 
-        // Map Panel inside scroll pane
         mapPanel = new ZoomableMapPanel("floorplan/Annex_2/1.png");
         JScrollPane scrollPane = new JScrollPane(
                 mapPanel,
@@ -45,43 +47,36 @@ public class Map extends JFrame {
             }
         });
 
-        // Bottom Navigation Bar (buildings)
         bottomNav = new JPanel(new FlowLayout(FlowLayout.CENTER));
         addBuildingButtons();
 
-        bottomNav.setVisible(false);
+        bottomNav.setVisible(true);
         bottomNav.setPreferredSize(new Dimension(500, 100));
         bottomNav.setBackground(new Color(217, 217, 217));
         bottomNav.setLayout(new GridLayout(0, 2, 10, 10));
         bottomNav.setBorder(new EmptyBorder(10, 20, 10, 20));
 
-        // Appear Toggle Button
         appearButton = new JToggleButton("☰");
         appearButton.setBackground(Color.WHITE);
         appearButton.setFocusable(false);
-        appearButton.setBounds(230, 701, 40, 10);
-
+        appearButton.setBounds(163, 605, 40, 10);
         appearButton.addActionListener(_ -> {
             boolean selected = appearButton.isSelected();
             bottomNav.setVisible(selected);
-            appearButton.setBounds(230, selected ? 605 : 701, 40, 10);
+            appearButton.setBounds(selected ? 163 : 230, selected ? 605 : 701, 40, 10);
         });
 
-        // Label for building and floor
         titleLabel = new JLabel("Annex_2 - Floor 1", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         titleLabel.setOpaque(true);
         titleLabel.setBackground(Color.WHITE);
         titleLabel.setBounds(0, 0, 500, 30);
 
-        // Search Field
         searchField = new JTextField();
         searchField.setBounds(10, 35, 350, 25);
 
-        // Search Button
         JButton searchButton = getJButton();
 
-        // LayeredPane to overlap button + label on scrollPane
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setPreferredSize(new Dimension(500, 700));
         scrollPane.setBounds(0, 0, 500, 700);
@@ -93,6 +88,15 @@ public class Map extends JFrame {
         layeredPane.add(searchField, JLayeredPane.DRAG_LAYER);
         layeredPane.add(searchButton, JLayeredPane.DRAG_LAYER);
 
+        // Room list on the left side
+        roomListModel = new DefaultListModel<>();
+        roomList = new JList<>(roomListModel);
+        roomList.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        roomScrollPane = new JScrollPane(roomList);
+        roomScrollPane.setPreferredSize(new Dimension(130, 700));
+        mainPanel.add(roomScrollPane, BorderLayout.WEST);
+        updateRoomList(currentBuilding, currentFloor);
+
         mainPanel.add(layeredPane, BorderLayout.CENTER);
         mainPanel.add(bottomNav, BorderLayout.PAGE_END);
 
@@ -102,7 +106,9 @@ public class Map extends JFrame {
 
     private JButton getJButton() {
         JButton searchButton = new JButton("Search Room");
-        searchButton.setBounds(370, 35, 120, 25);
+        searchButton.setBounds(360, 35, 120, 25);
+        searchButton.setForeground(Color.WHITE);
+        searchButton.setBackground(new Color(26, 26, 26));
         searchButton.addActionListener(_ -> {
             String query = searchField.getText().trim().toLowerCase();
             if (roomDirectory.containsKey(query)) {
@@ -116,6 +122,10 @@ public class Map extends JFrame {
                 appearButton.setSelected(false);
                 bottomNav.setVisible(false);
                 appearButton.setBounds(230, 701, 40, 10);
+
+                currentBuilding = building;
+                currentFloor = Integer.parseInt(floor);
+                updateRoomList(currentBuilding, currentFloor);
             } else {
                 JOptionPane.showMessageDialog(this, "Room not found!", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -124,34 +134,29 @@ public class Map extends JFrame {
     }
 
     private void populateRoomDirectory() {
-        // Annex_2 - 1st Floor
-        String b = "Annex_2";
-        roomDirectory.put("meeting room", b + " - Floor 1");
-        roomDirectory.put("clinic", b + " - Floor 1");
-        roomDirectory.put("faculty room", b + " - Floor 1");
-        roomDirectory.put("student services", b + " - Floor 1");
-        roomDirectory.put("canteen", b + " - Floor 1");
+        String annex = "Annex_2";
+        roomDirectory.put("meeting room", annex + " - Floor 1");
+        roomDirectory.put("clinic", annex + " - Floor 1");
+        roomDirectory.put("faculty room", annex + " - Floor 1");
+        roomDirectory.put("student services", annex + " - Floor 1");
+        roomDirectory.put("canteen", annex + " - Floor 1");
         for (int i = 101; i <= 107; i++) {
-            roomDirectory.put("room " + i, b + " - Floor 1");
+            roomDirectory.put("room " + i, annex + " - Floor 1");
         }
 
-        // 2nd Floor
-        roomDirectory.put("lrc", b + " - Floor 2");
-        roomDirectory.put("computer lab 1", b + " - Floor 2");
-        roomDirectory.put("computer lab 2", b + " - Floor 2");
-        roomDirectory.put("consultation room", b + " - Floor 2");
+        roomDirectory.put("lrc", annex + " - Floor 2");
+        roomDirectory.put("computer lab 1", annex + " - Floor 2");
+        roomDirectory.put("computer lab 2", annex + " - Floor 2");
+        roomDirectory.put("consultation room", annex + " - Floor 2");
         for (int i = 201; i <= 208; i++) {
-            roomDirectory.put("room " + i, b + " - Floor 2");
+            roomDirectory.put("room " + i, annex + " - Floor 2");
         }
 
-        // 3rd Floor
         for (int i = 301; i <= 311; i++) {
-            roomDirectory.put("room " + i, b + " - Floor 3");
+            roomDirectory.put("room " + i, annex + " - Floor 3");
         }
-
-        // 4th Floor
         for (int i = 401; i <= 411; i++) {
-            roomDirectory.put("room " + i, b + " - Floor 4");
+            roomDirectory.put("room " + i, annex + " - Floor 4");
         }
     }
 
@@ -173,7 +178,7 @@ public class Map extends JFrame {
 
     private void showFloorsForBuilding(String building) {
         bottomNav.removeAll();
-        bottomNav.setLayout(new GridLayout(0, 4, 10, 10));
+        bottomNav.setLayout(new GridLayout(0, 5, 5, 5));
         int floors = switch (building) {
             case "Main", "JMB" -> 8;
             case "Annex_1" -> 12;
@@ -183,24 +188,33 @@ public class Map extends JFrame {
         for (int i = 1; i <= floors; i++) {
             int floorNum = i;
             JButton floorBtn = new JButton("Floor " + floorNum);
+            floorBtn.setForeground(Color.WHITE);
+            floorBtn.setBackground(new Color(26, 26, 26));
             floorBtn.addActionListener(_ -> {
                 String path = "floorplan/" + building + "/" + floorNum + ".png";
                 mapPanel.loadNewImage(path);
                 titleLabel.setText(building + " - Floor " + floorNum);
+                currentBuilding = building;
+                currentFloor = floorNum;
+                updateRoomList(currentBuilding, currentFloor);
             });
             bottomNav.add(floorBtn);
         }
 
         JButton backBtn = new JButton("Buildings");
+        backBtn.setForeground(Color.WHITE);
+        backBtn.setBackground(new Color(115, 115, 115));
         backBtn.addActionListener(_ -> {
             addBuildingButtons();
-            bottomNav.setLayout(new GridLayout(0, 2, 10, 10));
+            bottomNav.setLayout(new GridLayout(0, 2, 5, 5));
             titleLabel.setText("Select a Building");
         });
 
         JButton resBtn = new JButton("Reserve");
+        resBtn.setForeground(Color.WHITE);
+        resBtn.setBackground(new Color(115, 115, 115));
         resBtn.addActionListener(_ -> {
-            this.dispose(); // Close the current window
+            this.dispose();
             Accounts accounts = new Accounts();
             new LoginSystem(accounts.getUserLogins(), accounts.getAdminLogins());
         });
@@ -211,11 +225,25 @@ public class Map extends JFrame {
         bottomNav.repaint();
     }
 
+    private void updateRoomList(String building, int floor) {
+        roomListModel.clear();
+        String floorKey = building + " - Floor " + floor;
+        for (String room : roomDirectory.keySet()) {
+            if (roomDirectory.get(room).equalsIgnoreCase(floorKey)) {
+                roomListModel.addElement(capitalize(room));
+            }
+        }
+    }
+
+    private String capitalize(String text) {
+        if (text == null || text.isEmpty()) return text;
+        return Character.toUpperCase(text.charAt(0)) + text.substring(1);
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(Map::new);
     }
 }
-
 
 class ZoomableMapPanel extends JPanel {
     private BufferedImage image;
@@ -228,7 +256,7 @@ class ZoomableMapPanel extends JPanel {
     public void loadNewImage(String imagePath) {
         try {
             image = ImageIO.read(new File(imagePath));
-            scale = 1.0;
+            scale = 0.3;
             setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
             revalidate();
             repaint();
