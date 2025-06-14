@@ -37,6 +37,25 @@ public class MyFrame extends JFrame {
         pathLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Start button
+        JButton startButton = getJButton();
+
+
+        // Add components to panel
+        panel.add(Box.createRigidArea(new Dimension(0, 20)));
+        panel.add(logoLabel);
+        panel.add(Box.createRigidArea(new Dimension(0, 20)));
+        panel.add(textLabel);
+        panel.add(Box.createRigidArea(new Dimension(0, 20)));
+        panel.add(pathLabel);
+        panel.add(Box.createRigidArea(new Dimension(0, -20))); // spacing before button
+        panel.add(startButton);
+        panel.add(Box.createVerticalGlue());
+
+        this.add(panel);
+        this.setVisible(true);
+    }
+
+    private JButton getJButton() {
         JButton startButton = new JButton("Start") {
             @Override
             protected void paintComponent(Graphics g) {
@@ -69,25 +88,11 @@ public class MyFrame extends JFrame {
         startButton.setPreferredSize(new Dimension(250, 40)); // Increased size
         startButton.setMaximumSize(new Dimension(250, 40));
         startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        startButton.addActionListener(e -> {
+        startButton.addActionListener(_ -> {
             this.dispose(); // Close current window
             new Map(); // Open Map window
         });
-
-
-        // Add components to panel
-        panel.add(Box.createRigidArea(new Dimension(0, 20)));
-        panel.add(logoLabel);
-        panel.add(Box.createRigidArea(new Dimension(0, 20)));
-        panel.add(textLabel);
-        panel.add(Box.createRigidArea(new Dimension(0, 20)));
-        panel.add(pathLabel);
-        panel.add(Box.createRigidArea(new Dimension(0, -20))); // spacing before button
-        panel.add(startButton);
-        panel.add(Box.createVerticalGlue());
-
-        this.add(panel);
-        this.setVisible(true);
+        return startButton;
     }
 
     public static void main(String[] args) {
