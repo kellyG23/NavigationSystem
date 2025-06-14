@@ -13,7 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Vector;
-//aaaaaa
+//aaaaaaa
 public class SchoolRoomReservationSystem extends JFrame {
 
     public SchoolRoomReservationSystem() {
