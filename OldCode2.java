@@ -7,7 +7,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class ReservationSystem extends JFrame {
+public class OldCode2 extends JFrame {
 //a
     private JLabel dateLabel;
     private JComboBox<String> dateComboBox;
@@ -29,7 +29,7 @@ public class ReservationSystem extends JFrame {
 
     private JButton reserveButton;
 
-    public ReservationSystem() {
+    public OldCode2() {
         setTitle("Reservation System");
         setSize(500, 750);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -151,7 +151,7 @@ public class ReservationSystem extends JFrame {
 
             saveRoomReservation(date, timeOut, timeIn, building, roomNumber, purpose);
 
-            ReservationDetailsFrame detailsFrame = new ReservationDetailsFrame(
+            OldCode3 detailsFrame = new OldCode3(
                     date, timeOut, timeIn, building, roomNumber, purpose
             );
             detailsFrame.setVisible(true);
@@ -198,6 +198,6 @@ public class ReservationSystem extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(ReservationSystem::new);
+        SwingUtilities.invokeLater(OldCode2::new);
     }
 }

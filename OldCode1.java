@@ -5,12 +5,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 //a
-public class AdminPanel1 extends JFrame {
+public class OldCode1 extends JFrame {
 
     private DefaultTableModel roomReservationTableModel;
     private JTable roomReservationTable;
 
-    public AdminPanel1() {
+    public OldCode1() {
         setTitle("Room Reservation System - Admin Panel");
         setSize(800, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -61,6 +61,6 @@ public class AdminPanel1 extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new AdminPanel1().setVisible(true));
+        SwingUtilities.invokeLater(() -> new OldCode1().setVisible(true));
     }
 }

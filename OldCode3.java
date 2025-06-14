@@ -1,10 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
 //a
-public class ReservationDetailsFrame extends JFrame {
+public class OldCode3 extends JFrame {
 
-    public ReservationDetailsFrame(String date, String timeOut, String timeIn,
-                                   String building, String roomNumber, String purpose) {
+    public OldCode3(String date, String timeOut, String timeIn,
+                    String building, String roomNumber, String purpose) {
         setTitle("Reservation Details");
         setSize(400, 350);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
