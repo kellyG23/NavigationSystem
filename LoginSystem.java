@@ -1,9 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.util.HashMap;
 
 public class LoginSystem implements ActionListener {
@@ -16,15 +13,17 @@ public class LoginSystem implements ActionListener {
     JLabel userPasswordLabel = new JLabel("Password");
     JLabel messageLabel = new JLabel("");
 
-    HashMap<String, String> loginfo = new HashMap<String, String>();
+    HashMap<String, String> userLogins;
+    HashMap<String, String> adminLogins;
 
-    LoginSystem(HashMap<String, String> loginforOriginal) {
-        loginfo = loginforOriginal; // Assign the provided login information
+    public LoginSystem(HashMap<String, String> users, HashMap<String, String> admins) {
+        this.userLogins = users;
+        this.adminLogins = admins;
 
         userIDLabel.setBounds(50, 100, 75, 25);
         userPasswordLabel.setBounds(50, 150, 75, 25);
 
-        messageLabel.setBounds(100, 250, 250, 25); // Adjusted width for message
+        messageLabel.setBounds(100, 250, 300, 25);
         messageLabel.setFont(new Font(null, Font.ITALIC, 15));
 
         userIDField.setBounds(125, 100, 200, 25);
@@ -38,11 +37,10 @@ public class LoginSystem implements ActionListener {
         resetButton.setFocusable(false);
         resetButton.addActionListener(this);
 
-        // Add KeyListener to userPasswordField
         userPasswordField.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    login(); // Call the login method when Enter is pressed
+                    login();
                 }
             }
         });
@@ -53,12 +51,13 @@ public class LoginSystem implements ActionListener {
         frame.add(userPasswordField);
         frame.add(loginButton);
         frame.add(resetButton);
-        frame.add(messageLabel); // Added messageLabel to the frame
+        frame.add(messageLabel);
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("Login System");
         frame.setSize(500, 750);
         frame.setLayout(null);
-        frame.setVisible(true); // Set visibility after adding components
+        frame.setVisible(true);
     }
 
     @Override
@@ -66,10 +65,11 @@ public class LoginSystem implements ActionListener {
         if (e.getSource() == resetButton) {
             userIDField.setText("");
             userPasswordField.setText("");
-            messageLabel.setText(""); // Clear message on reset
+            messageLabel.setText("");
         }
+
         if (e.getSource() == loginButton) {
-            login(); // Call the login method when the login button is pressed
+            login();
         }
     }
 
@@ -77,18 +77,21 @@ public class LoginSystem implements ActionListener {
         String userID = userIDField.getText();
         String password = String.valueOf(userPasswordField.getPassword());
 
-        if (loginfo.containsKey(userID)) {
-            if (loginfo.get(userID).equals(password)) {
-                messageLabel.setForeground(Color.GREEN);
-                messageLabel.setText("You are successfully logged in!");
-                ReservationSystem rs = new ReservationSystem();
-            } else {
-                messageLabel.setForeground(Color.RED);
-                messageLabel.setText("Your password is incorrect!");
-            }
-        } else {
+        if (adminLogins.containsKey(userID) && adminLogins.get(userID).equals(password)) {
+            messageLabel.setForeground(Color.GREEN);
+            messageLabel.setText("Admin login successful!");
+            frame.dispose();
+            new AdminPanel1();
+        }
+        else if (userLogins.containsKey(userID) && userLogins.get(userID).equals(password)) {
+            messageLabel.setForeground(Color.GREEN);
+            messageLabel.setText("User login successful!");
+            frame.dispose();
+            new ReservationSystem();
+        }
+        else {
             messageLabel.setForeground(Color.RED);
-            messageLabel.setText("Your user ID is incorrect!");
+            messageLabel.setText("Invalid username or password!");
         }
     }
 }

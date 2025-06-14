@@ -1,6 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-//a
+
 public class ReservationDetailsFrame extends JFrame {
 
     public ReservationDetailsFrame(String date, String timeOut, String timeIn,

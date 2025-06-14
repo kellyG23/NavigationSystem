@@ -7,8 +7,7 @@ import java.io.IOException;
 //a
 public class AdminPanel1 extends JFrame {
 
-    private DefaultTableModel roomReservationTableModel;
-    private JTable roomReservationTable;
+    private final DefaultTableModel roomReservationTableModel;
 
     public AdminPanel1() {
         setTitle("Room Reservation System - Admin Panel");
@@ -16,6 +15,7 @@ public class AdminPanel1 extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        setVisible(true);
 
         String[] roomColumnNames = { "Date", "Time Out", "Time In", "Building", "Room Number", "Purpose" };
         roomReservationTableModel = new DefaultTableModel(roomColumnNames, 0) {
@@ -24,7 +24,7 @@ public class AdminPanel1 extends JFrame {
                 return false;
             }
         };
-        roomReservationTable = new JTable(roomReservationTableModel);
+        JTable roomReservationTable = new JTable(roomReservationTableModel);
         roomReservationTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         roomReservationTable.setRowHeight(25);
         roomReservationTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));

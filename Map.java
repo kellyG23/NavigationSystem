@@ -201,8 +201,8 @@ public class Map extends JFrame {
         JButton resBtn = new JButton("Reserve");
         resBtn.addActionListener(_ -> {
             this.dispose(); // Close the current window
-            UserAccount userAccount = new UserAccount();
-            new LoginSystem(userAccount.getLoginInfo());
+            Accounts accounts = new Accounts();
+            new LoginSystem(accounts.getUserLogins(), accounts.getAdminLogins());
         });
 
         bottomNav.add(backBtn);
