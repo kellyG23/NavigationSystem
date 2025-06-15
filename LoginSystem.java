@@ -7,9 +7,10 @@ public class LoginSystem extends JFrame implements ActionListener {
     JFrame frame = new JFrame();
     JButton loginButton = new JButton("Login");
     JButton resetButton = new JButton("Reset");
+    JButton mapButton = new JButton("Map"); // New Map button
     JTextField userIDField = new JTextField();
     JPasswordField userPasswordField = new JPasswordField();
-    JLabel userIDLabel = new JLabel("User   ID");
+    JLabel userIDLabel = new JLabel("User    ID");
     JLabel userPasswordLabel = new JLabel("Password");
     JLabel messageLabel = new JLabel("");
     ImageIcon logoIcon = new ImageIcon("elements/Logo.png");
@@ -20,6 +21,7 @@ public class LoginSystem extends JFrame implements ActionListener {
     public LoginSystem(HashMap<String, String> users, HashMap<String, String> admins) {
         this.userLogins = users;
         this.adminLogins = admins;
+        this.getContentPane().setBackground(new Color(230, 240, 250));
 
         Image scaledLogoImage = logoIcon.getImage().getScaledInstance(250, 250, Image.SCALE_SMOOTH);
         JLabel logoLabel = new JLabel(new ImageIcon(scaledLogoImage));
@@ -43,6 +45,15 @@ public class LoginSystem extends JFrame implements ActionListener {
         resetButton.setFocusable(false);
         resetButton.addActionListener(this);
 
+        // New Map button setup
+        mapButton.setBounds(400, 10, 75, 25);
+        mapButton.setFocusable(false);
+        mapButton.addActionListener(e -> {
+            this.dispose();
+            new Map();
+        });
+
+
         userPasswordField.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -58,6 +69,7 @@ public class LoginSystem extends JFrame implements ActionListener {
         frame.add(userPasswordField);
         frame.add(loginButton);
         frame.add(resetButton);
+        frame.add(mapButton); // Add the Map button to the frame
         frame.add(messageLabel);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -88,19 +100,25 @@ public class LoginSystem extends JFrame implements ActionListener {
             messageLabel.setForeground(Color.GREEN);
             messageLabel.setText("Admin login successful!");
             frame.dispose();
-            new AdminPanel1();
+            new Admin();
         }
         else if (userLogins.containsKey(userID) && userLogins.get(userID).equals(password)) {
             messageLabel.setForeground(Color.GREEN);
-            messageLabel.setText("User login successful!");
+            messageLabel.setText("User  login successful!");
             frame.dispose();
-            new ReservationSystem();
+            new SchoolRoomReservationSystem();
         }
         else {
             messageLabel.setForeground(Color.RED);
             messageLabel.setText("Invalid username or password!");
         }
     }
+
+    private void openMap() {
+        frame.dispose(); // Close the current window
+        new Map(); // Open the Map window (assuming Map is a class that extends JFrame)
+    }
+
     public static void main(String[] args) {
         Runnable LoginSystem = () -> new LoginSystem(new HashMap<>(), new HashMap<>());
         SwingUtilities.invokeLater(LoginSystem);

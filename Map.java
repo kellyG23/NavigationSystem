@@ -16,9 +16,7 @@ public class Map extends JFrame {
     private final JTextField searchField;
     private final java.util.Map<String, String> roomDirectory = new HashMap<>();
 
-    private JList<String> roomList;
-    private DefaultListModel<String> roomListModel;
-    private JScrollPane roomScrollPane;
+    private final DefaultListModel<String> roomListModel;
 
     private String currentBuilding = "Annex_2";
     private int currentFloor = 1;
@@ -40,19 +38,20 @@ public class Map extends JFrame {
                 JScrollPane.VERTICAL_SCROLLBAR_NEVER,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         );
+        
         mapPanel.enableDragToPan(scrollPane);
         scrollPane.addMouseWheelListener(e -> {
             if (e.isControlDown()) {
                 mapPanel.zoom(e.getWheelRotation() < 0 ? 1.1 : 0.9);
             }
         });
-
+        mapPanel.setBackground(new Color(155, 172, 189));
         bottomNav = new JPanel(new FlowLayout(FlowLayout.CENTER));
         addBuildingButtons();
 
         bottomNav.setVisible(true);
         bottomNav.setPreferredSize(new Dimension(500, 100));
-        bottomNav.setBackground(new Color(217, 217, 217));
+        bottomNav.setBackground(new Color(230, 240, 250));
         bottomNav.setLayout(new GridLayout(0, 2, 10, 10));
         bottomNav.setBorder(new EmptyBorder(10, 20, 10, 20));
 
@@ -69,13 +68,19 @@ public class Map extends JFrame {
         titleLabel = new JLabel("Annex_2 - Floor 1", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         titleLabel.setOpaque(true);
-        titleLabel.setBackground(Color.WHITE);
+        titleLabel.setBackground(new Color(230, 240, 250));
         titleLabel.setBounds(0, 0, 500, 30);
 
         searchField = new JTextField();
+        searchField.setForeground(new Color(60, 90, 120));
         searchField.setBounds(10, 35, 350, 25);
 
         JButton searchButton = getJButton();
+        searchButton.setBackground(new Color(60, 90, 120));
+        searchButton.setForeground(Color.white);
+        searchButton.setFocusPainted(false);
+        searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        searchButton.setBorder(BorderFactory.createLineBorder(new Color(60, 90, 120), 2, true));
 
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setPreferredSize(new Dimension(500, 700));
@@ -90,12 +95,13 @@ public class Map extends JFrame {
 
         // Room list on the left side
         roomListModel = new DefaultListModel<>();
-        roomList = new JList<>(roomListModel);
+        JList<String> roomList = new JList<>(roomListModel);
         roomList.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        roomScrollPane = new JScrollPane(roomList);
+        JScrollPane roomScrollPane = new JScrollPane(roomList);
         roomScrollPane.setPreferredSize(new Dimension(130, 700));
         mainPanel.add(roomScrollPane, BorderLayout.WEST);
         updateRoomList(currentBuilding, currentFloor);
+        roomList.setBackground(new Color(230, 240, 250));
 
         mainPanel.add(layeredPane, BorderLayout.CENTER);
         mainPanel.add(bottomNav, BorderLayout.PAGE_END);
@@ -167,10 +173,12 @@ public class Map extends JFrame {
             JButton btn = new JButton(bld);
             btn.addActionListener(_ -> showFloorsForBuilding(bld));
             bottomNav.add(btn);
-            btn.setForeground(Color.WHITE);
-            btn.setBackground(new Color(26, 26, 26));
+
+            btn.setForeground(new Color(60, 90, 120));
+            btn.setBackground(Color.white);
             btn.setFocusPainted(false);
-            btn.setBorderPainted(false);
+            btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            btn.setBorder(BorderFactory.createLineBorder(new Color(60, 90, 120), 2, true));
         }
         bottomNav.revalidate();
         bottomNav.repaint();
@@ -188,8 +196,12 @@ public class Map extends JFrame {
         for (int i = 1; i <= floors; i++) {
             int floorNum = i;
             JButton floorBtn = new JButton("Floor " + floorNum);
-            floorBtn.setForeground(Color.WHITE);
-            floorBtn.setBackground(new Color(26, 26, 26));
+            floorBtn.setForeground(new Color(60, 90, 120));
+            floorBtn.setBackground(Color.white);
+            floorBtn.setFocusPainted(false);
+            floorBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            floorBtn.setBorder(BorderFactory.createLineBorder(new Color(60, 90, 120), 2, true));
+
             floorBtn.addActionListener(_ -> {
                 String path = "floorplan/" + building + "/" + floorNum + ".png";
                 mapPanel.loadNewImage(path);
@@ -197,13 +209,17 @@ public class Map extends JFrame {
                 currentBuilding = building;
                 currentFloor = floorNum;
                 updateRoomList(currentBuilding, currentFloor);
+
             });
             bottomNav.add(floorBtn);
         }
 
         JButton backBtn = new JButton("Buildings");
-        backBtn.setForeground(Color.WHITE);
-        backBtn.setBackground(new Color(115, 115, 115));
+        backBtn.setForeground(new Color(46, 139, 87));
+        backBtn.setBackground(Color.white);
+        backBtn.setFocusPainted(false);
+        backBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        backBtn.setBorder(BorderFactory.createLineBorder(new Color(46, 139, 87), 2, true));
         backBtn.addActionListener(_ -> {
             addBuildingButtons();
             bottomNav.setLayout(new GridLayout(0, 2, 5, 5));
@@ -211,8 +227,12 @@ public class Map extends JFrame {
         });
 
         JButton resBtn = new JButton("Reserve");
-        resBtn.setForeground(Color.WHITE);
-        resBtn.setBackground(new Color(115, 115, 115));
+        resBtn.setForeground(new Color(46, 139, 87));
+        resBtn.setBackground(Color.white);
+        resBtn.setFocusPainted(false);
+        resBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        resBtn.setBorder(BorderFactory.createLineBorder(new Color(46, 139, 87), 2, true));
+
         resBtn.addActionListener(_ -> {
             this.dispose();
             Accounts accounts = new Accounts();
